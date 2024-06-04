@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="keywords" content="Nerfies, D-NeRF, NeRF">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guided Querying over Videos using Autocompletion Suggestions</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+</head>
+
+<body>
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">Guided Querying over Videos using Autocompletion Suggestions</h1>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?user=V3dA3rAAAAAJ&hl=ko">Hojin Yoo</a>,</span>
+              <span class="author-block">
+                <a href="https://arnab.org">Arnab Nandi</a></span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">The Ohio State University</span>
+              <p class="author-block"><br/><em>To appear at <a href="https://hilda.io/2024/">HILDA 2024</a></em></p>
+            </div>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <!-- PDF Link. -->
+                <span class="link-block">
+                  <a href="https://doi.org/10.1145/3665939.3665964" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                    </span>
+                    <span>Paper</span>
+                  </a>
+                </span>
+                <!-- <span class="link-block">
+                  <a href="https://example.com" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                    </span>
+                    <span>arXiv</span>
+                  </a>
+                </span> -->
+                <!-- Video Link. -->
+                <!-- <span class="link-block">
+                  <a href="https://example.com" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                    </span>
+                    <span>Video</span>
+                  </a>
+                </span> -->
+                <!-- Code Link. -->
+                <span class="link-block">
+                  <a href="https://www.loom.com/share/237999c54e934d3a96d7d9b4c508fce8?sid=ee36f027-4068-4419-9ff8-b0eac9689160" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-file-video"></i>
+                    </span>
+                    <span>Demo</span>
+                  </a>
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="hero-body">
+        <video id="videoPlayer" width="100%" preload autoplay muted loop playsinline>
+          <source src="static/images/vidautocomplete-diagram.mp4" type="video/mp4" />
+        </video>
+
+        <!-- Safari will not autoplay a video tag if it's in low power mode. Here's the Apple-spesific workaround. -->
+        <img id="safariVideoPlayer" src="static/images/vidautocomplete-diagram.mp4" alt="" style="width: 100%; display: none;" />
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            if (isSafari) {
+              var videoPlayer = document.getElementById('videoPlayer');
+              var imageFallback = document.getElementById('safariVideoPlayer');
+              videoPlayer.style.display = 'none';
+              imageFallback.style.display = 'block';
+            }
+          });
+        </script>
+
+        <h2 class="subtitle has-text-centered">
+          A system that autocompletes queries for retrieval of video content based on <em>zero-shot video understanding</em> enhances user interactivity.
+        </h2>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              A critical challenge with querying video data is that the user is often unaware of the contents of the video, its structure, and the exact terminology to use in the query.
+              While these problems exist in exploratory querying settings over traditional structured data, these problems are exacerbated for video data, where the information is sourced from human-annotated metadata or from computer vision models running over the video.
+              In the absence of any guidance, the human is at a loss for where to begin the query session, or how to construct the query.
+              Here, autocompletion-based user interfaces have become a popular and pervasive approach to interactive, keystroke-level query guidance.
+              To guide the user through the query construction process, we develop methods that combine Vision Language Models and Large Language Models for generating query suggestions that are amenable to autocompletion-based user interfaces.
+              Through quantitative assessments over real-world datasets, we demonstrate that our approach provides a meaningful benefit to query construction for video queries.
+            </p>
+          </div>
+        </div>
+      </div>
+  </section>
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+
+      <div class="columns is-centered">
+        <div class="column is-full-width">
+          <h2 class="title is-3">The Video Query Suggestion System</h2>
+
+          <h3 class="title is-4">Traditional Video Database Management Systems (VDBMS) vs. Ours</h3>
+          <!-- I want to compare traditional video database management system and ours -->
+          <!-- recommend me template to show versus -->
+          <h4 class="title is-5">Traditional VDBMS</h6>
+          <div class="content has-text-justified">
+            <ul>
+              <li>
+                <b>Limited Information Utilization:</b> Traditional VDBMS rely solely on the information provided by deep learning models. They can only analyze videos based on the features extracted by these models.
+              </li>
+              <li>
+                <b>Simple Analyses:</b> These systems are capable of basic analyses, such as identifying object locations and directions within videos.
+              </li>
+              <li>
+                <b>Inability for Complex Queries:</b> When faced with complex queries (e.g., finding a video of “a man unloading a truck”), traditional VDBMS may struggle to perform the task effectively.
+              </li>
+            </ul>
+          </div>
+
+          <h6 class="title is-6">vs.</h6>
+
+          <h4 class="title is-5">Autocompletion System using Vision Language Models</h6>
+          <div class="content has-text-justified">
+            <ul>
+              <li>
+                <b>Multimodal Capabilities:</b> By integrating Multimodal Large Language Models (MLLMs) like VLMs, the system gains the ability to process data from different modalities (e.g., text, images, videos). This allows for more comprehensive analysis.
+              </li>
+              <li>
+                <b>Behavior and State Analysis:</b> The proposed approach can analyze the behavior and state of objects within videos, providing a more detailed understanding of the video content.
+              </li>
+              <li>
+                <b>Refined Search Queries:</b> Integrating VLMs with VDBMS enables the system to refine and automatically complete user search queries, improving the overall search experience.
+              </li>
+            </ul>
+          </div>
+
+          <br />
+
+          <h3 class="title is-4">Example</h2>
+
+          <div style="text-align: center;">
+            
+          </div>
+          <div class="content has-text-justified">
+            <img src="static/images/sample-prompt.png" alt="Sample prompt for autocompletion" 
+              style="display: block; margin: auto; width: 80%" />
+            <p style="font-size: 0.8em; text-align: center;">Sample prompt for autocompletion</p>
+            <p>
+              In the example above, if the user has typed part of a query, the system can suggest completions based on the context of the query. This feature helps users construct more accurate and relevant queries.
+            </p>
+          </div>
+
+          <br />
+
+          <h2 class="title is-3">Experiment</h2>
+          <div class="content has-text-justified">
+            <p>
+              We conducted an experiment to evaluate the effectiveness of our <em>segmented search phrases</em> in improving the search experience. The experiment involved calculating the average minimal keystrokes (MKS) required to complete a search query using our system.
+            </p>
+          <div class="content has-text-justified">
+            <img src="static/images/average-mks.png" alt="V2V Performance"
+              style="display: block; margin: auto; width: 60%;" />
+            <p style="font-size: 0.8em; text-align: center;">A distribuition of MKS when <em>k</em> = 10</p>
+            <p>
+              Our system requires on average <b>10 fewer inputs</b> to complete the desired search query, when suggesting up to 10 queries based on user input.
+            </p>
+          </div>
+        </div>
+  </section>
+
+
+  <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <!-- <pre><code>@inproceedings{yoo2024_guided,
+        title        = {Guided Querying over Videos using Autocompletion Suggestions},
+        author       = {Yoo, Hojin and Nandi, Arnab},
+        year         = 2024,
+        booktitle    = {2024 ACM SIGMOD/PODS Conference}
+}</code></pre> -->
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <!-- <p>
+              This material is based upon work supported by the National Science Foundation under Award No. 1910356. Any
+              opinions, findings and conclusions or recommendations expressed in this material are those of the
+              author(s) and do not necessarily reflect the views of the National Science Foundation.
+            </p> -->
+            <p>
+              This website is website adapted from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>,
+              licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+                Commons Attribution-ShareAlike 4.0 International License</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+
+</html>
