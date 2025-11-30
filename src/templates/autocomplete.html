@@ -1,0 +1,168 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>MSVD Autocomplete Demo</title>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" crossorigin="anonymous"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 30px; background: #fafafa; }
+    h1 { text-align: center; margin-bottom: 10px; }
+    p.description { text-align: center; color: #555; margin-top: 0; }
+    #searchContainer { display: flex; justify-content: center; gap: 10px; margin: 30px 0; }
+    #searchBox { width: 480px; padding: 10px; font-size: 16px; }
+    #btnSearch { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    #videoList { width: 80%; margin: 0 auto; max-width: 960px; }
+    .video-row { display: flex; border-bottom: 1px solid #ddd; padding: 15px 0; gap: 16px; align-items: flex-start; }
+    .video-thumbnail { flex: 0 0 320px; height: 180px; background: #000; position: relative; border-radius: 4px; overflow: hidden; cursor: pointer; }
+    .video-thumbnail img, .video-thumbnail video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .play-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      pointer-events: none;
+    }
+    .video-thumbnail.playing { cursor: default; }
+    .video-thumbnail.playing .play-overlay { display: none; }
+    .video-thumbnail.playing img { display: none; }
+    .video-description { flex: 1; font-size: 15px; color: #333; }
+    .score { font-size: 13px; color: #888; margin-top: 8px; }
+    .placeholder { text-align: center; color: #777; margin-top: 60px; }
+    #loadingIndicator {
+      text-align: center;
+      color: #555;
+      margin-top: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body data-mode="{{ mode }}">
+  <h1>MSVD Autocomplete Demo</h1>
+  <p class="description">
+    Type a description to explore MSVD clips. Autocomplete mode: <strong>{{ mode }}</strong>.
+  </p>
+  <div id="searchContainer">
+    <input type="text" id="searchBox" placeholder="Describe the scene you want to find" autocomplete="off" />
+    <button id="btnSearch">Search</button>
+  </div>
+  <div id="loadingIndicator">Fetching videos...</div>
+  <div id="videoList" class="placeholder">Start typing to explore suggestions.</div>
+
+  <script>
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function(match) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[match];
+      });
+    }
+
+    function escapeRegex(str) {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function renderVideos(items) {
+      const container = $('#videoList');
+      if (!items.length) {
+        container.html('<div class="placeholder">No videos found. Try refining your search.</div>');
+        return;
+      }
+      container.empty();
+      items.forEach(item => {
+        const row = $('<div class="video-row"></div>');
+        const thumb = $('<div class="video-thumbnail"></div>');
+        const img = $('<img alt="thumbnail" />').attr('src', item.thumbnail_url);
+        const overlay = $('<div class="play-overlay">▶</div>');
+        let videoEl = null;
+        function activateVideo() {
+          if (thumb.hasClass('playing')) {
+            if (videoEl) {
+              videoEl.get(0).play().catch(() => {});
+            }
+            return;
+          }
+          thumb.addClass('playing');
+          videoEl = $('<video controls preload="metadata"></video>')
+            .attr('poster', item.thumbnail_url)
+            .attr('src', item.video_url);
+          thumb.append(videoEl);
+          videoEl.get(0).play().catch(() => {});
+        }
+        img.on('click', activateVideo);
+        thumb.on('click', function(event) {
+          if (!thumb.hasClass('playing')) {
+            event.preventDefault();
+            activateVideo();
+          }
+        });
+        thumb.append(img, overlay);
+        const desc = $('<div class="video-description"></div>').text(item.description);
+        const score = $('<div class="score"></div>').text('similarity: ' + item.score.toFixed(3));
+        desc.append(score);
+        row.append(thumb).append(desc);
+        container.append(row);
+      });
+    }
+
+    $(function() {
+      $('#btnSearch').on('click', function() {
+        const query = $('#searchBox').val();
+        $('#loadingIndicator').show();
+        fetch('/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ searchTxt: query })
+        })
+        .then(response => {
+          if (!response.ok) { throw new Error('Request failed'); }
+          return response.json();
+        })
+        .then(renderVideos)
+        .catch(() => {
+          $('#videoList').html('<div class="placeholder">Error fetching videos.</div>');
+        })
+        .finally(() => {
+          $('#loadingIndicator').hide();
+        });
+      });
+
+      const autocomplete = $('#searchBox').autocomplete({
+        minLength: 2,
+        source: function(request, response) {
+          $.ajax({
+            url: '/autocomplete',
+            data: { term: request.term },
+            success: function(data) {
+              response(data.map(item => ({
+                label: item.value,
+                value: item.value,
+                displayLabel: item.display_label || item.label
+              })));
+            }
+          });
+        }
+      });
+
+      autocomplete.data('ui-autocomplete')._renderItem = function(ul, item) {
+        const term = this.term ? this.term.trim() : '';
+        let displayText = item.displayLabel || item.label || '';
+        let safeDisplay = escapeHtml(displayText);
+        if (term) {
+          const regex = new RegExp(`(${escapeRegex(term)})`, 'ig');
+          safeDisplay = safeDisplay.replace(regex, '<strong>$1</strong>');
+        }
+        return $('<li></li>').append(`<div>${safeDisplay}</div>`).appendTo(ul);
+      };
+    });
+  </script>
+</body>
+</html>
